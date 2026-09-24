@@ -1,37 +1,42 @@
-let wood_num = 0;//木头数量
-let wood_axe_num = 0;//木斧数量,每一个使单次砍树获得木头数量+1
+    // ========== 资源数据（统一管理） ==========
+const resources = {
+    wood_num:     { name: "原木", count: 0, revealed: false },
+    wood_axe_num: { name: "木斧", count: 0, revealed: false, desc: "每次撸树获得木头数+1" },
+};
 
-// 记录每个侧边栏项是否已经显示过（一旦为 true 就不再隐藏）
-let wood_num_revealed = false;
-let wood_axe_num_revealed = false;
+// 简写访问
+const wood     = resources.wood_num;
+const wood_axe = resources.wood_axe_num;
 
+// ========== 侧边栏渲染 ==========
 function RefreshSidebar() {
-    // 更新内容
-    document.getElementById("wood_num").innerHTML = "原木:" + wood_num;
-    document.getElementById("wood_axe_num").innerHTML = "木斧:" + wood_axe_num;
+    for (const [id, res] of Object.entries(resources)) {
+        const el = document.getElementById(id);
+        if (!el) continue;
 
-    // 值为非零且尚未显示过 → 显示它（之后永远不隐藏）
-    if (wood_num > 0 && !wood_num_revealed) {
-        wood_num_revealed = true;
-        document.getElementById("wood_num").style.display = "block";
-    }
-    if (wood_axe_num > 0 && !wood_axe_num_revealed) {
-        wood_axe_num_revealed = true;
-        document.getElementById("wood_axe_num").style.display = "block";
+        // 更新文本：名称居左，数量居右（CSS flex 自动排列）
+        el.innerHTML = `<span>${res.name}</span><span class="item-count">${res.count}</span>`;
+
+        // 首次非零 → 揭示（之后永不隐藏）
+        if (res.count > 0 && !res.revealed) {
+            res.revealed = true;
+            el.dataset.revealed = "true";
+        }
     }
 }
 
+// ========== 游戏逻辑 ==========
 function GetWood() {
-    wood_num += 1 + wood_axe_num;
-    console.log("撸树", wood_num);
+    wood.count += 1 + wood_axe.count;
+    console.log("撸树", wood.count);
     RefreshSidebar();
 }
 
 function BuyWoodAxe() {
-    if (wood_num >= 4) {
-        wood_num -= 4;
-        wood_axe_num++;
-        console.log("购买木斧", wood_axe_num);
+    if (wood.count >= 4) {
+        wood.count -= 4;
+        wood_axe.count++;
+        console.log("购买木斧", wood_axe.count);
     }
     RefreshSidebar();
 }
