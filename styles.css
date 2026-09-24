@@ -197,3 +197,10 @@ body {
   color: var(--text-secondary);
   font-weight: 400;
 }
+
+/* 动作按钮列表间距 */
+#action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
