@@ -1,6 +1,4 @@
-// ==============================
-// Resource Data
-// ==============================
+
 
 const resources = {
     wood: { name: '原木', count: 0, revealed: false, storageCost: 1 },
@@ -38,9 +36,7 @@ function resourcesAdd(resourceName, count) {
 }
 
 
-// ==============================
-// Action Definitions
-// ==============================
+
 
 const actions = [
     // -- Production --
@@ -167,9 +163,7 @@ const actions = [
 ];
 
 
-// ==============================
-// Render: Sidebar
-// ==============================
+
 
 function renderStorage() {
     const container = document.getElementById('storage-display');
@@ -216,9 +210,6 @@ function refreshSidebar() {
 }
 
 
-// ==============================
-// Render: Action Buttons
-// ==============================
 
 function refreshActions() {
     const container = document.getElementById('action-list');
@@ -257,18 +248,12 @@ function refreshActions() {
 }
 
 
-// ==============================
-// Game Loop
-// ==============================
 
 function tick() {
     // Future: passive income per second, etc.
 }
 
 
-// ==============================
-// Init
-// ==============================
 
 refreshSidebar();
 refreshActions();
