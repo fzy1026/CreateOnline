@@ -17,7 +17,11 @@
         </div>
         <div class="content">
             <h1 class="game-title">Create Online</h1>
-            <div id="action-list"></div>
+            <nav class="page-nav">
+                <button class="page-btn active" data-page="main" onclick="pageChange('main')">📋 主界面</button>
+                <button class="page-btn" data-page="machine" onclick="pageChange('machine')">🏭 机器</button>
+            </nav>
+            <div id="page-content"></div>
         </div>
     </div>
 
