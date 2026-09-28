@@ -366,6 +366,11 @@ body {
   color: var(--text-secondary);
 }
 
+.recipe-cd{
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
 .recipe-stepper {
   display: flex;
   align-items: center;

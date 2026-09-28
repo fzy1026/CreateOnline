@@ -4,6 +4,8 @@ const resources = {
     iron_ore: { name: '铁矿', count: 0, revealed: false, storageCost: 1 },
     coal: { name: '煤炭', count: 0, revealed: false, storageCost: 1 },
     iron: { name: '铁锭', count: 0, revealed: false, storageCost: 1 },
+    gold_ore: { name: '金矿', count: 0, revealed: false, storageCost: 1 },
+    gold: { name: '金锭', count: 0, revealed: false, storageCost: 1 },
 };
 
 const tools = {
@@ -12,6 +14,8 @@ const tools = {
     cobblestone_axe: { name: '石斧', count: 0 },
     cobblestone_pickaxe: { name: '石镐', count: 0 },
     chest: { name: '箱子', count: 0 },
+    iron_pickaxe: { name: '铁镐', count: 0 },
+    iron_axe: { name: '铁斧', count: 0 },
 };
 
 const machines = {
@@ -27,6 +31,7 @@ const machines = {
                 cd: 10,
                 count: 0,
                 counter: 0,
+                tag:["smelting"],
                 work() {
                     if (resources.iron_ore.count < 1 || resources.coal.count < 1) return;
                     if (storageUsed + resources.iron.storageCost > storageMax) return;
@@ -42,6 +47,7 @@ const machines = {
                 cd: 5,
                 count: 0,
                 counter: 0,
+                tag:[],
                 work() {
                     if (!(resources.wood.count > 0 && resources.coal.count > 0)) return;
                     resourcesAdd('coal', 5);
@@ -60,8 +66,23 @@ let storageMax = 2880;
 let storageUsed = 0;
 let coalProbability = 0.1;
 let ironOreProbability = 0;
+let goldOreProbability = 0;
 let currentPage = 'main';//当前页面
 
+function LuckyGet(probability) {
+    let ans = 0;
+    while(probability > 0) {
+        let random = Math.random();
+        if (random < probability) {
+            ans++;
+            probability-=1;
+        }
+        else{
+            probability = 0;
+        }
+    }
+    return ans;
+}
 
 function pageChange(pageId) {
     currentPage = pageId;
@@ -121,6 +142,9 @@ const actions = [
             }
             if (Math.random() < ironOreProbability) {
                 resourcesAdd('iron_ore', 1);
+            }
+            if(Math.random() < goldOreProbability){
+                resourcesAdd('gold_ore', 1);
             }
         },
     },
@@ -237,6 +261,46 @@ const actions = [
         info() {
             return '数量:' + tools.chest.count;
         }
+    },
+    {
+        id: 'buy_iron_axe',
+        name: '铁斧 (30原木+10铁锭/个)',
+        icon: '🪓',
+        desc: '每次撸树获得木头数 +10',
+        type: 'secondary',
+        revealed: false,
+        condition() { return resources.wood.count >= 30 && resources.iron.count >= 10; },
+        effect() {
+            if (resources.wood.count < 30 || resources.iron.count < 10) return;
+            resourcesAdd('wood', -30);
+            resourcesAdd('iron', -10);
+            tools.iron_axe.count += 1;
+            cutGetCount += 10;
+        },
+        info() {
+            return '数量:' + tools.iron_axe.count;
+        }
+    },
+    {
+        id: 'buy_iron_pickaxe',
+        name: '铁镐 (30原木+10铁锭/个)',
+        icon: '⛏️',
+        desc: '每次挖矿获得圆石数 +10，挖矿时获得铁矿概率+0.05,金矿概率 +0.02',
+        type: 'secondary',
+        revealed: false,
+        condition() { return resources.wood.count >= 30 && resources.iron.count >= 10; },
+        effect() {
+            if (resources.wood.count < 30 || resources.iron.count < 10) return;
+            resourcesAdd('wood', -30);
+            resourcesAdd('iron', -10);
+            tools.iron_pickaxe.count += 1;
+            mineGetCount += 10;
+            ironOreProbability += 0.05;
+            goldOreProbability += 0.02;
+        },
+        info() {
+            return '数量:' + tools.iron_pickaxe.count;
+        }
     }
 ];
 
@@ -345,6 +409,7 @@ function updatePage() {
                             <div class="recipe-info">
                                 <span class="recipe-name">${recipe.name}</span>
                                 <span class="recipe-desc">${recipe.description}</span>
+                                <span class="recipe-cd">配方工作时间: ${recipe.cd}s</span>
                             </div>
                             <div class="recipe-stepper">
                                 <button class="recipe-stepper-btn" onclick="adjustRecipe('${id}', '${recipe.id}', -1)" ${assigned <= 0 ? 'disabled' : ''}>−</button>
