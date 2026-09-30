@@ -1,5 +1,3 @@
-let mineGetCount = 0;
-let cutGetCount = 1;
 let storageMax = 2880;
 let storageUsed = 0;
 let currentPage = 'main';//当前页面
@@ -11,12 +9,16 @@ const resources = {
         count: 0,
         revealed: false,
         storageCost: 1,
+        probability: 1,
+        tags: ['cut']
     },
     cobblestone: {
         name: '圆石',
         count: 0,
         revealed: false,
         storageCost: 1,
+        probability: 0,
+        tags: ['mine']
     },
     coal: {
         name: '煤炭',
@@ -24,6 +26,7 @@ const resources = {
         revealed: false,
         storageCost: 1,
         probability: 0,
+        tags: ['mine'],
     },
     iron_ore: {
         name: '铁矿',
@@ -31,6 +34,7 @@ const resources = {
         revealed: false,
         storageCost: 1,
         probability: 0,
+        tags: ['mine'],
     },
     iron: {
         name: '铁锭',
@@ -44,6 +48,7 @@ const resources = {
         revealed: false,
         storageCost: 1,
         probability: 0,
+        tags: ['mine'],
     },
     gold: {
         name: '金锭',
@@ -57,6 +62,7 @@ const resources = {
         revealed: false,
         storageCost: 1,
         probability: 0,
+        tags: ['mine'],
     },
     diamond: {
         name: '钻石',
@@ -64,6 +70,7 @@ const resources = {
         revealed: false,
         storageCost: 1,
         probability: 0,
+        tags: ['mine'],
     },
     lapis_lazuli: {
         name: '青金石',
@@ -71,6 +78,7 @@ const resources = {
         revealed: false,
         storageCost: 1,
         probability: 0,
+        tags: ['mine'],
     },
     lava: {
         name: '岩浆',
@@ -84,6 +92,7 @@ const resources = {
         revealed: false,
         storageCost: 1,
         probability: 0,
+        tags: ['mine'],
     },
 };
 
@@ -116,6 +125,14 @@ const tools = {
         name: '铁斧',
         count: 0,
     },
+    diamond_pickaxe: {
+        name: '钻石镐',
+        count: 0,
+    },
+    diamond_axe: {
+        name: '钻石斧',
+        count: 0,
+    }
 };
 
 const machines = {
@@ -131,7 +148,7 @@ const machines = {
                 cd: 10,
                 count: 0,
                 counter: 0,
-                tag:["smelting"],
+                tag: ["smelting"],
                 work() {
                     if (resources.iron_ore.count < 1 || resources.coal.count < 1) return;
                     if (storageUsed + resources.iron.storageCost > storageMax) return;
@@ -147,7 +164,7 @@ const machines = {
                 cd: 5,
                 count: 0,
                 counter: 0,
-                tag:[],
+                tag: [],
                 work() {
                     if (!(resources.wood.count > 0 && resources.coal.count > 0)) return;
                     resourcesAdd('coal', 5);
@@ -161,38 +178,38 @@ const machines = {
 };
 
 const upgrades = {
-    nether_portal:{
-        id:'nether_portal',
-        name:'制作下界传送门',
-        description:'用14个黑曜石制作下界传送门以进入下界',
-        revealed:false,
-        condition() { return resources.obsidian.count > 0;},
-        effect(){
-            if(resources.obsidian.count < 14) return;
+    nether_portal: {
+        id: 'nether_portal',
+        name: '制作下界传送门',
+        description: '用14个黑曜石制作下界传送门以进入下界',
+        revealed: false,
+        condition() { return resources.obsidian.count > 0; },
+        effect() {
+            if (resources.obsidian.count < 14) return;
             revealed = true;
             resourcesAdd('obsidian', -14);
         }
     },
-    enter_village:{
-        id:'enter_village',
-        name:'进入村庄',
-        description:'用64个绿宝石换取村民的信任，以进入村庄',
-        revealed:false,
-        condition() { return resources.emerald.count > 1;},
-        effect(){
-            if(resources.emerald.count < 64) return;
+    enter_village: {
+        id: 'enter_village',
+        name: '进入村庄',
+        description: '用64个绿宝石换取村民的信任，以进入村庄',
+        revealed: false,
+        condition() { return resources.emerald.count > 1; },
+        effect() {
+            if (resources.emerald.count < 64) return;
             revealed = true;
             resourcesAdd('emerald', -64);
         }
     },
-    visit_piglin:{
-        id:'visit_piglin',
-        name:'“猪”就友谊',
-        description:'用64个金锭结识一些“猪”队友',
-        revealed:false,
-        condition() { return upgrades.nether_portal.revealed;},
-        effect(){
-            if(resources.gold.count < 64) return;
+    visit_piglin: {
+        id: 'visit_piglin',
+        name: '“猪”就友谊',
+        description: '用64个金锭结识一些“猪”队友',
+        revealed: false,
+        condition() { return upgrades.nether_portal.revealed; },
+        effect() {
+            if (resources.gold.count < 64) return;
             revealed = true;
             resourcesAdd('gold', -64);
         }
@@ -201,27 +218,27 @@ const upgrades = {
 }
 
 const merchants = {
-    librarian:{
-        id:'librarian',
-        name:'图书管理员',
-        trades:[
+    librarian: {
+        id: 'librarian',
+        name: '图书管理员',
+        trades: [
             {
-                id:'trade_emerald_for_book',
-                name:'绿宝石换书',
-                cost:{emerald:5},
-                reward:{book:1}
+                id: 'trade_emerald_for_book',
+                name: '绿宝石换书',
+                cost: { emerald: 5 },
+                reward: { book: 1 }
             }
         ]
     },
-    blacksmith:{
-        id:'blacksmith',
-        name:'铁匠',
-        trades:[
+    blacksmith: {
+        id: 'blacksmith',
+        name: '铁匠',
+        trades: [
             {
-                id:'trade_iron_for_axe',
-                name:'铁锭换斧',
-                cost:{iron:10},
-                reward:{axe:1}
+                id: 'trade_iron_for_axe',
+                name: '铁锭换斧',
+                cost: { iron: 10 },
+                reward: { axe: 1 }
             }
         ]
     }
@@ -229,16 +246,11 @@ const merchants = {
 
 function LuckyGet(probability) {
     let ans = 0;
-    while(probability > 0) {
-        let random = Math.random();
-        if (random < probability) {
-            ans++;
-            probability-=1;
-        }
-        else{
-            probability = 0;
-        }
+    while (probability > 1) {
+        ans++;
+        probability -= 1;
     }
+    ans += Math.random() < probability ? 1 : 0;
     return ans;
 }
 
@@ -282,7 +294,11 @@ const actions = [
         revealed: true,
         condition() { return true; },
         effect() {
-            resourcesAdd('wood', cutGetCount);
+            for ([id, res] of Object.entries(resources)) {
+                if (res.tags && res.tags.includes('cut')) {
+                    resourcesAdd(id, LuckyGet(res.probability));
+                }
+            }
         },
     },
     {
@@ -293,15 +309,10 @@ const actions = [
         revealed: false,
         condition() { return tools.wood_pick.count > 0; },
         effect() {
-            resourcesAdd('cobblestone', mineGetCount);
-            if (Math.random() < resources['coal'].probability) {
-                resourcesAdd('coal', 1);
-            }
-                if (Math.random() < resources['iron_ore'].probability) {
-                resourcesAdd('iron_ore', 1);
-            }
-            if(Math.random() < resources['gold_ore'].probability){
-                resourcesAdd('gold_ore', 1);
+            for ([id, res] of Object.entries(resources)) {
+                if (res.tags && res.tags.includes('mine')) {
+                    resourcesAdd(id, LuckyGet(res.probability));
+                }
             }
         },
     },
@@ -319,7 +330,7 @@ const actions = [
             if (resources.wood.count < 20) return;
             resourcesAdd('wood', -20);
             tools.wood_axe.count += 1;
-            cutGetCount += 1;
+            resources['wood'].probability++;
         },
         info() {
             return '数量:' + tools.wood_axe.count;
@@ -337,7 +348,7 @@ const actions = [
             if (resources.wood.count < 20) return;
             resourcesAdd('wood', -20);
             tools.wood_pick.count += 1;
-            mineGetCount += 1;
+            resources['cobblestone'].probability++;
             resources['coal'].probability += 0.005;
         },
         info() {
@@ -375,7 +386,7 @@ const actions = [
             resourcesAdd('wood', -30);
             resourcesAdd('cobblestone', -20);
             tools.cobblestone_axe.count += 1;
-            cutGetCount += 3;
+            resources['wood'].probability += 3;
         },
         info() {
             return '数量:' + tools.cobblestone_axe.count;
@@ -394,7 +405,7 @@ const actions = [
             resourcesAdd('wood', -30);
             resourcesAdd('cobblestone', -20);
             tools.cobblestone_pickaxe.count += 1;
-            mineGetCount += 3;
+            resources['cobblestone'].probability += 3;
             resources['coal'].probability += 0.01;
             resources['iron_ore'].probability += 0.01;
         },
@@ -433,7 +444,7 @@ const actions = [
             resourcesAdd('wood', -30);
             resourcesAdd('iron', -10);
             tools.iron_axe.count += 1;
-            cutGetCount += 10;
+            resources['wood'].probability += 10;
         },
         info() {
             return '数量:' + tools.iron_axe.count;
@@ -452,7 +463,7 @@ const actions = [
             resourcesAdd('wood', -30);
             resourcesAdd('iron', -10);
             tools.iron_pickaxe.count += 1;
-            mineGetCount += 10;
+            resources['cobblestone'].probability += 10;
             resources['coal'].probability += 0.05;
             resources['iron_ore'].probability += 0.05;
             resources['gold_ore'].probability += 0.05;
@@ -465,20 +476,20 @@ const actions = [
         }
     },
     {
-        id:'buy_diamond_pickaxe',
-        name:'钻石镐 (50原木+10钻石/个)',
-        icon:'⛏️',
-        desc:'每次挖矿获得圆石数 +50，挖矿时获得所有种类矿物的概率大幅度提升,并可以获得黑曜石',
-        type:'secondary',
-        revealed:false,
-        condition(){return resources.wood.count >= 50 && resources.diamond.count >= 10;},
-        effect(){
-            if(resources.wood.count < 50 || resources.diamond.count < 10) return;
+        id: 'buy_diamond_pickaxe',
+        name: '钻石镐 (50原木+10钻石/个)',
+        icon: '⛏️',
+        desc: '每次挖矿获得圆石数 +50，挖矿时获得所有种类矿物的概率大幅度提升,并可以获得黑曜石',
+        type: 'secondary',
+        revealed: false,
+        condition() { return resources.wood.count >= 50 && resources.diamond.count >= 10; },
+        effect() {
+            if (resources.wood.count < 50 || resources.diamond.count < 10) return;
             resourcesAdd('wood', -50);
             resourcesAdd('diamond', -10);
-            tools.diamond_pickaxe = tools.diamond_pickaxe || {name:'钻石镐', count:0};
+            tools.diamond_pickaxe = tools.diamond_pickaxe || { name: '钻石镐', count: 0 };
             tools.diamond_pickaxe.count += 1;
-            mineGetCount += 50;
+            resources['cobblestone'].probability += 50;
             resources['coal'].probability += 0.05;
             resources['iron_ore'].probability += 0.05;
             resources['gold_ore'].probability += 0.05;
@@ -491,20 +502,20 @@ const actions = [
         }
     },
     {
-        id:'buy_diamond_axe',
-        name:'钻石斧 (50原木+10钻石/个)',
-        icon:'🪓',
-        desc:'每次砍树获得木头数 +50',
-        type:'secondary',
-        revealed:false,
-        condition(){return resources.wood.count >= 50 && resources.diamond.count >= 10;},
-        effect(){
-            if(resources.wood.count < 50 || resources.diamond.count < 10) return;
+        id: 'buy_diamond_axe',
+        name: '钻石斧 (50原木+10钻石/个)',
+        icon: '🪓',
+        desc: '每次砍树获得木头数 +50',
+        type: 'secondary',
+        revealed: false,
+        condition() { return resources.wood.count >= 50 && resources.diamond.count >= 10; },
+        effect() {
+            if (resources.wood.count < 50 || resources.diamond.count < 10) return;
             resourcesAdd('wood', -50);
             resourcesAdd('diamond', -10);
-            tools.diamond_axe = tools.diamond_axe || {name:'钻石斧', count:0};
+            tools.diamond_axe = tools.diamond_axe || { name: '钻石斧', count: 0 };
             tools.diamond_axe.count += 1;
-            cutGetCount += 50;
+            resources['wood'].probability += 50;
         },
         info() {
             return '数量:' + tools.diamond_axe.count;
@@ -612,12 +623,23 @@ function updatePage() {
                 for (let recipe of machine.recipes) {
                     const assigned = recipe.count || 0;
                     const available = machine.count - machine.recipes.reduce((sum, r) => sum + (r.count || 0), 0) + assigned;
+                    const counter = recipe.counter || 0;
+                    const cd = recipe.cd || 1;
+                    const pct = Math.min(counter / cd, 1) * 100;
+                    let fillClass = '';
+                    if (pct >= 100) fillClass = 'complete';
+                    else if (pct >= 75) fillClass = 'near-complete';
                     bodyHTML += `
-                        <div class="recipe-row">
+                        <div class="recipe-row" data-machine="${id}" data-recipe="${recipe.id}">
                             <div class="recipe-info">
                                 <span class="recipe-name">${recipe.name}</span>
                                 <span class="recipe-desc">${recipe.description}</span>
-                                <span class="recipe-cd">配方工作时间: ${recipe.cd}s</span>
+                                <div class="recipe-progress">
+                                    <div class="recipe-progress-track">
+                                        <div class="recipe-progress-fill ${fillClass}" style="width:${pct.toFixed(1)}%"></div>
+                                    </div>
+                                    <div class="recipe-progress-text">${counter}/${cd}s</div>
+                                </div>
                             </div>
                             <div class="recipe-stepper">
                                 <button class="recipe-stepper-btn" onclick="adjustRecipe('${id}', '${recipe.id}', -1)" ${assigned <= 0 ? 'disabled' : ''}>−</button>
@@ -642,7 +664,7 @@ function updatePage() {
             container.appendChild(card);
         }
     }
-    else if(currentPage === 'upgrades') {
+    else if (currentPage === 'upgrades') {
         for (const [id, upgrade] of Object.entries(upgrades)) {
             if (!upgrade.condition() && !upgrade.revealed) continue;
 
@@ -719,21 +741,35 @@ function adjustRecipe(machineId, recipeId, delta) {
     updatePage();
 }
 
+function updateRecipeProgress(machineId, recipeId, counter, cd) {
+    const row = document.querySelector(`.recipe-row[data-machine="${machineId}"][data-recipe="${recipeId}"]`);
+    if (!row) return;
+    const fill = row.querySelector('.recipe-progress-fill');
+    const text = row.querySelector('.recipe-progress-text');
+    if (!fill || !text) return;
+    const pct = Math.min(counter / cd, 1) * 100;
+    fill.style.width = pct.toFixed(1) + '%';
+    fill.classList.remove('near-complete', 'complete');
+    if (pct >= 100) fill.classList.add('complete');
+    else if (pct >= 75) fill.classList.add('near-complete');
+    text.textContent = `${counter}/${cd}s`;
+}
+
 function processMachines() {
     for (const [id, machine] of Object.entries(machines)) {
         if (machine.count <= 0) continue;
         for (let recipe of machine.recipes) {
             if (recipe.count <= 0) continue;
-            console.log(`Processing machine: ${id}, recipe: ${recipe.id}, count: ${recipe.count}, counter: ${recipe.counter}, cd: ${recipe.cd}`);
             recipe.counter = recipe.counter || 0;
             recipe.counter++;
             if (recipe.counter >= recipe.cd) {
                 recipe.counter = 0;
-                for(let i = 0; i < recipe.count; i++) {
+                for (let i = 0; i < recipe.count; i++) {
                     recipe.work();
                 }
                 refreshSidebar();
             }
+            updateRecipeProgress(id, recipe.id, recipe.counter, recipe.cd);
         }
     }
 }
