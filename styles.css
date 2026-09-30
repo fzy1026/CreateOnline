@@ -417,3 +417,66 @@ body {
   min-width: 28px;
   text-align: center;
 }
+
+/* ========== 升级卡片 ========== */
+
+.upgrade-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px var(--shadow);
+  overflow: hidden;
+}
+
+.upgrade-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.upgrade-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.upgrade-done {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 2px 12px;
+  border-radius: 6px;
+}
+
+.upgrade-body {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.upgrade-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.btn-upgrade {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(245, 87, 108, 0.35);
+  white-space: nowrap;
+}
+
+.btn-upgrade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 87, 108, 0.45);
+}
+
+.btn-upgrade:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+}

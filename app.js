@@ -1,21 +1,121 @@
+let mineGetCount = 0;
+let cutGetCount = 1;
+let storageMax = 2880;
+let storageUsed = 0;
+let currentPage = 'main';//当前页面
+
 const resources = {
-    wood: { name: '原木', count: 0, revealed: false, storageCost: 1 },
-    cobblestone: { name: '圆石', count: 0, revealed: false, storageCost: 1 },
-    iron_ore: { name: '铁矿', count: 0, revealed: false, storageCost: 1 },
-    coal: { name: '煤炭', count: 0, revealed: false, storageCost: 1 },
-    iron: { name: '铁锭', count: 0, revealed: false, storageCost: 1 },
-    gold_ore: { name: '金矿', count: 0, revealed: false, storageCost: 1 },
-    gold: { name: '金锭', count: 0, revealed: false, storageCost: 1 },
+    // 基础资源
+    wood: {
+        name: '原木',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+    },
+    cobblestone: {
+        name: '圆石',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+    },
+    coal: {
+        name: '煤炭',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+        probability: 0,
+    },
+    iron_ore: {
+        name: '铁矿',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+        probability: 0,
+    },
+    iron: {
+        name: '铁锭',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+    },
+    gold_ore: {
+        name: '金矿',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+        probability: 0,
+    },
+    gold: {
+        name: '金锭',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+    },
+    emerald: {
+        name: '绿宝石',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+        probability: 0,
+    },
+    diamond: {
+        name: '钻石',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+        probability: 0,
+    },
+    lapis_lazuli: {
+        name: '青金石',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+        probability: 0,
+    },
+    lava: {
+        name: '岩浆',
+        count: 0,
+        revealed: false,
+        storageCost: 64,
+    },
+    obsidian: {
+        name: '黑曜石',
+        count: 0,
+        revealed: false,
+        storageCost: 1,
+        probability: 0,
+    },
 };
 
 const tools = {
-    wood_axe: { name: '木斧', count: 0 },
-    wood_pick: { name: '木镐', count: 0 },
-    cobblestone_axe: { name: '石斧', count: 0 },
-    cobblestone_pickaxe: { name: '石镐', count: 0 },
-    chest: { name: '箱子', count: 0 },
-    iron_pickaxe: { name: '铁镐', count: 0 },
-    iron_axe: { name: '铁斧', count: 0 },
+    wood_axe: {
+        name: '木斧',
+        count: 0,
+    },
+    wood_pick: {
+        name: '木镐',
+        count: 0,
+    },
+    cobblestone_axe: {
+        name: '石斧',
+        count: 0,
+    },
+    cobblestone_pickaxe: {
+        name: '石镐',
+        count: 0,
+    },
+    chest: {
+        name: '箱子',
+        count: 0,
+    },
+    iron_pickaxe: {
+        name: '铁镐',
+        count: 0,
+    },
+    iron_axe: {
+        name: '铁斧',
+        count: 0,
+    },
 };
 
 const machines = {
@@ -60,14 +160,72 @@ const machines = {
 
 };
 
-let mineGetCount = 0;
-let cutGetCount = 1;
-let storageMax = 2880;
-let storageUsed = 0;
-let coalProbability = 0.1;
-let ironOreProbability = 0;
-let goldOreProbability = 0;
-let currentPage = 'main';//当前页面
+const upgrades = {
+    nether_portal:{
+        id:'nether_portal',
+        name:'制作下界传送门',
+        description:'用14个黑曜石制作下界传送门以进入下界',
+        revealed:false,
+        condition() { return resources.obsidian.count > 0;},
+        effect(){
+            if(resources.obsidian.count < 14) return;
+            revealed = true;
+            resourcesAdd('obsidian', -14);
+        }
+    },
+    enter_village:{
+        id:'enter_village',
+        name:'进入村庄',
+        description:'用64个绿宝石换取村民的信任，以进入村庄',
+        revealed:false,
+        condition() { return resources.emerald.count > 1;},
+        effect(){
+            if(resources.emerald.count < 64) return;
+            revealed = true;
+            resourcesAdd('emerald', -64);
+        }
+    },
+    visit_piglin:{
+        id:'visit_piglin',
+        name:'“猪”就友谊',
+        description:'用64个金锭结识一些“猪”队友',
+        revealed:false,
+        condition() { return upgrades.nether_portal.revealed;},
+        effect(){
+            if(resources.gold.count < 64) return;
+            revealed = true;
+            resourcesAdd('gold', -64);
+        }
+    }
+
+}
+
+const merchants = {
+    librarian:{
+        id:'librarian',
+        name:'图书管理员',
+        trades:[
+            {
+                id:'trade_emerald_for_book',
+                name:'绿宝石换书',
+                cost:{emerald:5},
+                reward:{book:1}
+            }
+        ]
+    },
+    blacksmith:{
+        id:'blacksmith',
+        name:'铁匠',
+        trades:[
+            {
+                id:'trade_iron_for_axe',
+                name:'铁锭换斧',
+                cost:{iron:10},
+                reward:{axe:1}
+            }
+        ]
+    }
+}
 
 function LuckyGet(probability) {
     let ans = 0;
@@ -136,14 +294,13 @@ const actions = [
         condition() { return tools.wood_pick.count > 0; },
         effect() {
             resourcesAdd('cobblestone', mineGetCount);
-
-            if (Math.random() < coalProbability) {
+            if (Math.random() < resources['coal'].probability) {
                 resourcesAdd('coal', 1);
             }
-            if (Math.random() < ironOreProbability) {
+                if (Math.random() < resources['iron_ore'].probability) {
                 resourcesAdd('iron_ore', 1);
             }
-            if(Math.random() < goldOreProbability){
+            if(Math.random() < resources['gold_ore'].probability){
                 resourcesAdd('gold_ore', 1);
             }
         },
@@ -154,7 +311,7 @@ const actions = [
         id: 'buy_wood_axe',
         name: '木斧 (20原木/个)',
         icon: '🛠️',
-        desc: '每次撸树获得木头数 +1',
+        desc: '每次砍树获得木头数 +1',
         type: 'secondary',
         revealed: false,
         condition() { return resources.wood.count >= 20; },
@@ -172,7 +329,7 @@ const actions = [
         id: 'buy_wood_pickaxe',
         name: '木镐 (20原木/个)',
         icon: '⛏️',
-        desc: '每次挖矿获得圆石数 +1，挖掘时获得煤炭概率 +0.01',
+        desc: '每次挖矿获得圆石数 +1，挖掘时获得煤炭概率些微增加',
         type: 'secondary',
         revealed: false,
         condition() { return resources.wood.count >= 20; },
@@ -181,7 +338,7 @@ const actions = [
             resourcesAdd('wood', -20);
             tools.wood_pick.count += 1;
             mineGetCount += 1;
-            coalProbability += 0.01;
+            resources['coal'].probability += 0.005;
         },
         info() {
             return '数量:' + tools.wood_pick.count;
@@ -209,7 +366,7 @@ const actions = [
         id: 'buy_cobblestone_axe',
         name: '石斧 (30原木+20圆石/个)',
         icon: '🪓',
-        desc: '每次撸树获得木头数 +3',
+        desc: '每次砍树获得木头数 +3',
         type: 'secondary',
         revealed: false,
         condition() { return resources.wood.count >= 30 && resources.cobblestone.count >= 20; },
@@ -228,7 +385,7 @@ const actions = [
         id: 'buy_cobblestone_pickaxe',
         name: '石镐 (30原木+20圆石/个)',
         icon: '⛏️',
-        desc: '每次挖矿获得圆石数 +3，挖矿时获得铁矿概率 +0.01',
+        desc: '每次挖矿获得圆石数 +3，挖矿时获得铁矿,煤矿的概率小幅度增加',
         type: 'secondary',
         revealed: false,
         condition() { return resources.wood.count >= 30 && resources.cobblestone.count >= 20; },
@@ -238,7 +395,8 @@ const actions = [
             resourcesAdd('cobblestone', -20);
             tools.cobblestone_pickaxe.count += 1;
             mineGetCount += 3;
-            ironOreProbability += 0.01;
+            resources['coal'].probability += 0.01;
+            resources['iron_ore'].probability += 0.01;
         },
         info() {
             return '数量:' + tools.cobblestone_pickaxe.count;
@@ -266,7 +424,7 @@ const actions = [
         id: 'buy_iron_axe',
         name: '铁斧 (30原木+10铁锭/个)',
         icon: '🪓',
-        desc: '每次撸树获得木头数 +10',
+        desc: '每次砍树获得木头数 +10',
         type: 'secondary',
         revealed: false,
         condition() { return resources.wood.count >= 30 && resources.iron.count >= 10; },
@@ -285,7 +443,7 @@ const actions = [
         id: 'buy_iron_pickaxe',
         name: '铁镐 (30原木+10铁锭/个)',
         icon: '⛏️',
-        desc: '每次挖矿获得圆石数 +10，挖矿时获得铁矿概率+0.05,金矿概率 +0.02',
+        desc: '每次挖矿获得圆石数 +10，挖矿时获得所有种类矿物的概率小幅度提升',
         type: 'secondary',
         revealed: false,
         condition() { return resources.wood.count >= 30 && resources.iron.count >= 10; },
@@ -295,11 +453,61 @@ const actions = [
             resourcesAdd('iron', -10);
             tools.iron_pickaxe.count += 1;
             mineGetCount += 10;
-            ironOreProbability += 0.05;
-            goldOreProbability += 0.02;
+            resources['coal'].probability += 0.05;
+            resources['iron_ore'].probability += 0.05;
+            resources['gold_ore'].probability += 0.05;
+            resources['emerald'].probability += 0.05;
+            resources['diamond'].probability += 0.05;
+            resources['lapis_lazuli'].probability += 0.05;
         },
         info() {
             return '数量:' + tools.iron_pickaxe.count;
+        }
+    },
+    {
+        id:'buy_diamond_pickaxe',
+        name:'钻石镐 (50原木+10钻石/个)',
+        icon:'⛏️',
+        desc:'每次挖矿获得圆石数 +50，挖矿时获得所有种类矿物的概率大幅度提升,并可以获得黑曜石',
+        type:'secondary',
+        revealed:false,
+        condition(){return resources.wood.count >= 50 && resources.diamond.count >= 10;},
+        effect(){
+            if(resources.wood.count < 50 || resources.diamond.count < 10) return;
+            resourcesAdd('wood', -50);
+            resourcesAdd('diamond', -10);
+            tools.diamond_pickaxe = tools.diamond_pickaxe || {name:'钻石镐', count:0};
+            tools.diamond_pickaxe.count += 1;
+            mineGetCount += 50;
+            resources['coal'].probability += 0.05;
+            resources['iron_ore'].probability += 0.05;
+            resources['gold_ore'].probability += 0.05;
+            resources['emerald'].probability += 0.05;
+            resources['diamond'].probability += 0.05;
+            resources['lapis_lazuli'].probability += 0.05;
+        },
+        info() {
+            return '数量:' + tools.diamond_pickaxe.count;
+        }
+    },
+    {
+        id:'buy_diamond_axe',
+        name:'钻石斧 (50原木+10钻石/个)',
+        icon:'🪓',
+        desc:'每次砍树获得木头数 +50',
+        type:'secondary',
+        revealed:false,
+        condition(){return resources.wood.count >= 50 && resources.diamond.count >= 10;},
+        effect(){
+            if(resources.wood.count < 50 || resources.diamond.count < 10) return;
+            resourcesAdd('wood', -50);
+            resourcesAdd('diamond', -10);
+            tools.diamond_axe = tools.diamond_axe || {name:'钻石斧', count:0};
+            tools.diamond_axe.count += 1;
+            cutGetCount += 50;
+        },
+        info() {
+            return '数量:' + tools.diamond_axe.count;
         }
     }
 ];
@@ -434,10 +642,50 @@ function updatePage() {
             container.appendChild(card);
         }
     }
+    else if(currentPage === 'upgrades') {
+        for (const [id, upgrade] of Object.entries(upgrades)) {
+            if (!upgrade.condition() && !upgrade.revealed) continue;
 
+            const wasRevealed = upgrade.revealed;
+            upgrade.revealed = true;
+
+            const card = document.createElement('div');
+            card.className = 'upgrade-card';
+            card.id = 'upgrade-' + id;
+
+            if (wasRevealed) {
+                card.innerHTML = `
+                    <div class="upgrade-header">
+                        <span class="upgrade-name">✅ ${upgrade.name}</span>
+                        <span class="upgrade-done">已完成</span>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div class="upgrade-header">
+                        <span class="upgrade-name">${upgrade.name}</span>
+                    </div>
+                    <div class="upgrade-body">
+                        <span class="upgrade-desc">${upgrade.description}</span>
+                        <button class="btn btn-upgrade" onclick="activateUpgrade('${id}')">🔓 激活</button>
+                    </div>
+                `;
+            }
+
+            container.appendChild(card);
+        }
+    }
 }
 
 
+
+function activateUpgrade(upgradeId) {
+    const upgrade = upgrades[upgradeId];
+    if (!upgrade) return;
+    upgrade.effect();
+    refreshSidebar();
+    updatePage();
+}
 
 function adjustRecipe(machineId, recipeId, delta) {
     let goalMachine = null;
